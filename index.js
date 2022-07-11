@@ -1,22 +1,31 @@
 const express = require("express");
 
 const app = express();
+const port = 3000;
+const anodeRouter = require("./routes/anode");
+const helmet = require("helmet");
 
-const users = [];
-
+app.use(helmet());
 app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 
 app.get("/user", function (req, res) {
-  return res.send({ users: users });
+  res.json({ message: "ok" });
 });
 
-app.post("/user", function (req, res) {
-  console.log(req.body);
-  users.push({ name: req.body.name, age: req.body.age });
-
-  return res.send({ success: true });
+app.use("/anode", anodeRouter);
+/* Error handler middleware */
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  console.error(err.message, err.stack);
+  res.status(statusCode).json({ message: err.message });
+  return;
 });
 
-app.listen(3000, function () {
-  console.log("server listening...");
+app.listen(port, () => {
+  console.log("Example app listening at http://localhost:${port}");
 });
